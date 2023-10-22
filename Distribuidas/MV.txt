@@ -1,0 +1,11 @@
+dist113 - tYrH5BCtTmrN
+dist114 - CJQrvTGFVQ67
+dist115 - NpNzXvBzfZuU
+dist116 - pELNfVmPNC6W
+
+ssh matias.gonzalez@capela.inf.santiago.usm.cl
+Giorgio-Boo10
+
+ssh dist@dist113.inf.santiago.usm.cl
+
+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
