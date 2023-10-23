@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"os"
 
 	"google.golang.org/grpc"
 	"github.com/google/uuid"
@@ -14,8 +15,29 @@ import (
 
 type GreetingServer struct {
 	pb.GreetingServiceServer
+	pb.DataServiceServer
 	dataNodeClient1 pb.DataNodeServiceClient
 	dataNodeClient2 pb.DataNodeServiceClient
+}
+
+func (s *DataServiceServer) GetData(ctx context.Context, req *pb.DataRequest) (*pb.DataResponse, error) {
+	data, err := readDataFromFile() // Implement this function to read data from "data.txt"
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DataResponse{Data: data}, nil
+}
+
+func writeLine(Nombre string, Apellido string, Id string){
+	line := []byte(Nombre + " " + Apellido + " " + Id + "\n")
+	f, err := os.OpenFile("DATA.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	if _, err = f.Write(line); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (s *GreetingServer) Greeting(ctx context.Context, req *pb.GreetingServiceRequest) (*pb.GreetingServiceReply, error) {
@@ -26,6 +48,10 @@ func (s *GreetingServer) Greeting(ctx context.Context, req *pb.GreetingServiceRe
 
 	uniqueID := generateUniqueID()
 	fmt.Println(uniqueID)
+
+	writeLine(req.Nombre, req.Apellido, uniqueID)
+
+
 
 	dataNodeRequest := &pb.DataNodeServiceStorage{
 		Id:        uniqueID,

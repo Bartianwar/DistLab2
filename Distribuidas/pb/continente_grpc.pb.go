@@ -197,3 +197,93 @@ var DataNodeService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "continente.proto",
 }
+
+const (
+	DataService_GetData_FullMethodName = "/DataService/GetData"
+)
+
+// DataServiceClient is the client API for DataService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type DataServiceClient interface {
+	GetData(ctx context.Context, in *DataRequest, opts ...grpc.CallOption) (*DataResponse, error)
+}
+
+type dataServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewDataServiceClient(cc grpc.ClientConnInterface) DataServiceClient {
+	return &dataServiceClient{cc}
+}
+
+func (c *dataServiceClient) GetData(ctx context.Context, in *DataRequest, opts ...grpc.CallOption) (*DataResponse, error) {
+	out := new(DataResponse)
+	err := c.cc.Invoke(ctx, DataService_GetData_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// DataServiceServer is the server API for DataService service.
+// All implementations must embed UnimplementedDataServiceServer
+// for forward compatibility
+type DataServiceServer interface {
+	GetData(context.Context, *DataRequest) (*DataResponse, error)
+	mustEmbedUnimplementedDataServiceServer()
+}
+
+// UnimplementedDataServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedDataServiceServer struct {
+}
+
+func (UnimplementedDataServiceServer) GetData(context.Context, *DataRequest) (*DataResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetData not implemented")
+}
+func (UnimplementedDataServiceServer) mustEmbedUnimplementedDataServiceServer() {}
+
+// UnsafeDataServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DataServiceServer will
+// result in compilation errors.
+type UnsafeDataServiceServer interface {
+	mustEmbedUnimplementedDataServiceServer()
+}
+
+func RegisterDataServiceServer(s grpc.ServiceRegistrar, srv DataServiceServer) {
+	s.RegisterService(&DataService_ServiceDesc, srv)
+}
+
+func _DataService_GetData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DataRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DataServiceServer).GetData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DataService_GetData_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataServiceServer).GetData(ctx, req.(*DataRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// DataService_ServiceDesc is the grpc.ServiceDesc for DataService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var DataService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "DataService",
+	HandlerType: (*DataServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetData",
+			Handler:    _DataService_GetData_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "continente.proto",
+}

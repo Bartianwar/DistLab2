@@ -1,0 +1,5 @@
+ed16ad72-2155-4c18-9305-1e87ed32ac7b muerto
+272d07a8-2971-44ec-9ead-0617e8985744 infectado
+48f6e8f5-41da-4495-b2c2-3d7602a5f539 infectado
+792256c9-4d3d-4e8c-9831-0202cb51baa8 infectado
+713e3f43-0636-4589-99e7-da85aba07ace infectado

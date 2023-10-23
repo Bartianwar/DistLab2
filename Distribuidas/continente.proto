@@ -10,6 +10,10 @@ service DataNodeService{
     rpc Storage(DataNodeServiceStorage) returns (GreetingServiceReply) {}
 }
 
+service DataService {
+    rpc GetData (DataRequest) returns (DataResponse);
+}
+
 message GreetingServiceRequest {
     string nombre = 1;
     string apellido = 2;
@@ -23,4 +27,12 @@ message GreetingServiceReply {
 message DataNodeServiceStorage {
     string id = 5;
     bool EstaMuerto = 6;
+}
+
+message DataResponse {
+    repeated string data = 7;
+}
+
+message DataRequest{
+    string data = 8;
 }
