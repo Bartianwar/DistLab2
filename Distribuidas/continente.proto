@@ -4,15 +4,14 @@ option go_package = "/pb";
 
 service GreetingService {
     rpc Greeting(GreetingServiceRequest) returns (GreetingServiceReply) {}
+    rpc GetNames (DataState) returns (DataNames) {}
 }
 
 service DataNodeService{
     rpc Storage(DataNodeServiceStorage) returns (GreetingServiceReply) {}
+    rpc GetData(stream DataRequest) returns (stream DataResponse) {}
 }
 
-service DataService {
-    rpc GetData (DataRequest) returns (DataResponse);
-}
 
 message GreetingServiceRequest {
     string nombre = 1;
@@ -31,9 +30,17 @@ message DataNodeServiceStorage {
 }
 
 message DataResponse {
-    repeated string data = 8;
+    string data = 8;
 }
 
 message DataRequest{
     string data = 9;
+}
+
+message DataState {
+    string data = 10;
+}
+
+message DataNames {
+    string data = 11;
 }

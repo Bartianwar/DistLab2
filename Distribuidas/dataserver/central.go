@@ -8,6 +8,8 @@ import (
 	"net"
 	"strings"
 	"os"
+	"io"
+	"bufio"
 
 	"google.golang.org/grpc"
 	"github.com/google/uuid"
@@ -19,26 +21,106 @@ type GreetingServer struct {
 	dataNodeClient2 pb.DataNodeServiceClient
 }
 
-type DataServiceServer struct {
-	pb.DataServiceServer
-}
-
-
 func readDataFromFile() ([]string, error) {
 	file, err := os.Open("DATA.txt")
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return nil, nil
+    if err != nil {
+        fmt.Println("Error opening file:", err)
+    }
+    defer file.Close()
+
+    var lines []string
+
+    scanner := bufio.NewScanner(file)
+	fmt.Println("Esta antes de scanner")
+    for scanner.Scan() {
+        lines = append(lines, scanner.Text())
+    }
+    if err := scanner.Err(); err != nil {
+        fmt.Println("Error reading file:", err)
+    }
+
+	return lines, nil
+
 }
 
-func (s *DataServiceServer) GetData(ctx context.Context, req *pb.DataRequest) (*pb.DataResponse, error) {
+func getList(Estado string) ([]string, []string) {
 	data, err := readDataFromFile()
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return &pb.DataResponse{Data: data}, nil
+
+	var dn1 []string
+	var dn2 []string
+
+	for _, line := range data {
+
+		parts := strings.Split(line, " ")
+		if parts[1] == Estado {
+			if parts[2] == "1"{
+				dn1 = append(dn1, parts[0])
+			} else {
+				dn2 = append(dn2, parts[0])
+			}
+		}
+	}
+
+	return dn1, dn2
+}
+
+func (s *GreetingServer) GetNames(ctx context.Context, req *pb.DataState) (*pb.DataNames, error) {
+	db1, db2 := getList(req.Data)
+	fmt.Println(db1)
+	fmt.Println(db2)
+
+	stream, err := s.dataNodeClient1.GetData(ctx)
+	
+	if err != nil {
+		log.Fatalf("Failed to call DataNodeService.GetData: %v", err)
+	}
+	for _, data := range db1 {
+		stream.Send(&pb.DataRequest{Data: data})
+	}
+
+	if err := stream.CloseSend(); err != nil {
+		log.Fatalf("Failed to close stream: %v", err)
+	}
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to receive stream response: %v", err)
+		}
+		fmt.Println(resp.Data)
+	}
+
+	stream, err = s.dataNodeClient2.GetData(ctx)
+	
+	if err != nil {
+		log.Fatalf("Failed to call DataNodeService.GetData: %v", err)
+	}
+	for _, data := range db2 {
+		stream.Send(&pb.DataRequest{Data: data})
+	}
+
+	if err := stream.CloseSend(); err != nil {
+		log.Fatalf("Failed to close stream: %v", err)
+	}
+
+	for {
+		resp, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("Failed to receive stream response: %v", err)
+		}
+		fmt.Println(resp.Data)
+	}
+
+    return &pb.DataNames{Data: "WowFunciono"}, nil
 }
 
 func writeLine(Id string, cualData string, Estado string){
@@ -66,15 +148,11 @@ func (s *GreetingServer) Greeting(ctx context.Context, req *pb.GreetingServiceRe
 	}
 
 	uniqueID := generateUniqueID()
-	fmt.Println(uniqueID)
-
 	dataNodeRequest := &pb.DataNodeServiceStorage{
 		Id:        uniqueID,
 		Nombre:    req.Nombre,
 		Apellido:  req.Apellido,
 	}
-
-	
 
 	var dataNodeClient pb.DataNodeServiceClient
 	if strings.ToLower(req.Apellido) < "m" {
@@ -128,9 +206,22 @@ func main() {
 
 	server := grpc.NewServer()
 	pb.RegisterGreetingServiceServer(server, greetingServer)
+
+	getNamesListener, err := net.Listen("tcp", ":8085")
+	if err != nil {
+		log.Fatalf("Failed to create listener for GetNames: %v", err)
+	}
+	defer getNamesListener.Close()
+
 	go func() {
 		if err := server.Serve(greetingListener); err != nil {
 			log.Fatalf("Failed to serve GreetingService: %v", err)
+		}
+	}()
+
+	go func() {
+		if err := server.Serve(getNamesListener); err != nil {
+			log.Fatalf("Failed to serve GetNames: %v", err)
 		}
 	}()
 

@@ -99,7 +99,6 @@ func main() {
 		processLine(cc, lines[currLine])
 	}
 
-	// Process the remaining lines with a sleep.
 	for currLine := numLinesToRead; currLine < len(lines); currLine++ {
 		time.Sleep(3 * time.Second)
 		processLine(cc, lines[currLine])

@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	GreetingService_Greeting_FullMethodName = "/GreetingService/Greeting"
+	GreetingService_GetNames_FullMethodName = "/GreetingService/GetNames"
 )
 
 // GreetingServiceClient is the client API for GreetingService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GreetingServiceClient interface {
 	Greeting(ctx context.Context, in *GreetingServiceRequest, opts ...grpc.CallOption) (*GreetingServiceReply, error)
+	GetNames(ctx context.Context, in *DataState, opts ...grpc.CallOption) (*DataNames, error)
 }
 
 type greetingServiceClient struct {
@@ -46,11 +48,21 @@ func (c *greetingServiceClient) Greeting(ctx context.Context, in *GreetingServic
 	return out, nil
 }
 
+func (c *greetingServiceClient) GetNames(ctx context.Context, in *DataState, opts ...grpc.CallOption) (*DataNames, error) {
+	out := new(DataNames)
+	err := c.cc.Invoke(ctx, GreetingService_GetNames_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // GreetingServiceServer is the server API for GreetingService service.
 // All implementations must embed UnimplementedGreetingServiceServer
 // for forward compatibility
 type GreetingServiceServer interface {
 	Greeting(context.Context, *GreetingServiceRequest) (*GreetingServiceReply, error)
+	GetNames(context.Context, *DataState) (*DataNames, error)
 	mustEmbedUnimplementedGreetingServiceServer()
 }
 
@@ -60,6 +72,9 @@ type UnimplementedGreetingServiceServer struct {
 
 func (UnimplementedGreetingServiceServer) Greeting(context.Context, *GreetingServiceRequest) (*GreetingServiceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Greeting not implemented")
+}
+func (UnimplementedGreetingServiceServer) GetNames(context.Context, *DataState) (*DataNames, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNames not implemented")
 }
 func (UnimplementedGreetingServiceServer) mustEmbedUnimplementedGreetingServiceServer() {}
 
@@ -92,6 +107,24 @@ func _GreetingService_Greeting_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _GreetingService_GetNames_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DataState)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreetingServiceServer).GetNames(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: GreetingService_GetNames_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreetingServiceServer).GetNames(ctx, req.(*DataState))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // GreetingService_ServiceDesc is the grpc.ServiceDesc for GreetingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -103,6 +136,10 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Greeting",
 			Handler:    _GreetingService_Greeting_Handler,
 		},
+		{
+			MethodName: "GetNames",
+			Handler:    _GreetingService_GetNames_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "continente.proto",
@@ -110,6 +147,7 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	DataNodeService_Storage_FullMethodName = "/DataNodeService/Storage"
+	DataNodeService_GetData_FullMethodName = "/DataNodeService/GetData"
 )
 
 // DataNodeServiceClient is the client API for DataNodeService service.
@@ -117,6 +155,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DataNodeServiceClient interface {
 	Storage(ctx context.Context, in *DataNodeServiceStorage, opts ...grpc.CallOption) (*GreetingServiceReply, error)
+	GetData(ctx context.Context, opts ...grpc.CallOption) (DataNodeService_GetDataClient, error)
 }
 
 type dataNodeServiceClient struct {
@@ -136,11 +175,43 @@ func (c *dataNodeServiceClient) Storage(ctx context.Context, in *DataNodeService
 	return out, nil
 }
 
+func (c *dataNodeServiceClient) GetData(ctx context.Context, opts ...grpc.CallOption) (DataNodeService_GetDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &DataNodeService_ServiceDesc.Streams[0], DataNodeService_GetData_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &dataNodeServiceGetDataClient{stream}
+	return x, nil
+}
+
+type DataNodeService_GetDataClient interface {
+	Send(*DataRequest) error
+	Recv() (*DataResponse, error)
+	grpc.ClientStream
+}
+
+type dataNodeServiceGetDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *dataNodeServiceGetDataClient) Send(m *DataRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *dataNodeServiceGetDataClient) Recv() (*DataResponse, error) {
+	m := new(DataResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DataNodeServiceServer is the server API for DataNodeService service.
 // All implementations must embed UnimplementedDataNodeServiceServer
 // for forward compatibility
 type DataNodeServiceServer interface {
 	Storage(context.Context, *DataNodeServiceStorage) (*GreetingServiceReply, error)
+	GetData(DataNodeService_GetDataServer) error
 	mustEmbedUnimplementedDataNodeServiceServer()
 }
 
@@ -150,6 +221,9 @@ type UnimplementedDataNodeServiceServer struct {
 
 func (UnimplementedDataNodeServiceServer) Storage(context.Context, *DataNodeServiceStorage) (*GreetingServiceReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Storage not implemented")
+}
+func (UnimplementedDataNodeServiceServer) GetData(DataNodeService_GetDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetData not implemented")
 }
 func (UnimplementedDataNodeServiceServer) mustEmbedUnimplementedDataNodeServiceServer() {}
 
@@ -182,6 +256,32 @@ func _DataNodeService_Storage_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DataNodeService_GetData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DataNodeServiceServer).GetData(&dataNodeServiceGetDataServer{stream})
+}
+
+type DataNodeService_GetDataServer interface {
+	Send(*DataResponse) error
+	Recv() (*DataRequest, error)
+	grpc.ServerStream
+}
+
+type dataNodeServiceGetDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *dataNodeServiceGetDataServer) Send(m *DataResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *dataNodeServiceGetDataServer) Recv() (*DataRequest, error) {
+	m := new(DataRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DataNodeService_ServiceDesc is the grpc.ServiceDesc for DataNodeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -194,96 +294,13 @@ var DataNodeService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DataNodeService_Storage_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "continente.proto",
-}
-
-const (
-	DataService_GetData_FullMethodName = "/DataService/GetData"
-)
-
-// DataServiceClient is the client API for DataService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DataServiceClient interface {
-	GetData(ctx context.Context, in *DataRequest, opts ...grpc.CallOption) (*DataResponse, error)
-}
-
-type dataServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewDataServiceClient(cc grpc.ClientConnInterface) DataServiceClient {
-	return &dataServiceClient{cc}
-}
-
-func (c *dataServiceClient) GetData(ctx context.Context, in *DataRequest, opts ...grpc.CallOption) (*DataResponse, error) {
-	out := new(DataResponse)
-	err := c.cc.Invoke(ctx, DataService_GetData_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// DataServiceServer is the server API for DataService service.
-// All implementations must embed UnimplementedDataServiceServer
-// for forward compatibility
-type DataServiceServer interface {
-	GetData(context.Context, *DataRequest) (*DataResponse, error)
-	mustEmbedUnimplementedDataServiceServer()
-}
-
-// UnimplementedDataServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedDataServiceServer struct {
-}
-
-func (UnimplementedDataServiceServer) GetData(context.Context, *DataRequest) (*DataResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetData not implemented")
-}
-func (UnimplementedDataServiceServer) mustEmbedUnimplementedDataServiceServer() {}
-
-// UnsafeDataServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DataServiceServer will
-// result in compilation errors.
-type UnsafeDataServiceServer interface {
-	mustEmbedUnimplementedDataServiceServer()
-}
-
-func RegisterDataServiceServer(s grpc.ServiceRegistrar, srv DataServiceServer) {
-	s.RegisterService(&DataService_ServiceDesc, srv)
-}
-
-func _DataService_GetData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DataRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DataServiceServer).GetData(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DataService_GetData_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DataServiceServer).GetData(ctx, req.(*DataRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// DataService_ServiceDesc is the grpc.ServiceDesc for DataService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var DataService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "DataService",
-	HandlerType: (*DataServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "GetData",
-			Handler:    _DataService_GetData_Handler,
+			StreamName:    "GetData",
+			Handler:       _DataNodeService_GetData_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "continente.proto",
 }
