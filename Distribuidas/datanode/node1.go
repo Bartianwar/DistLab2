@@ -14,14 +14,9 @@ type server struct {
 	pb.DataNodeServiceServer
 }
 
-func writeLine(Estado bool, Id string) {
-	var EstadoF string
-	if Estado {
-		EstadoF = "muerto"
-	} else {
-		EstadoF = "infectado"
-	}
-	line := []byte(Id + " " + EstadoF + "\n")
+func writeLine(Id string , Nombre string, Apellido string) {
+
+	line := []byte(Id + " " + Nombre + " " + Apellido + "\n")
 	f, err := os.OpenFile("DATA.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		log.Fatal(err)
@@ -35,8 +30,9 @@ func writeLine(Estado bool, Id string) {
 func (s *server) Storage(ctx context.Context, req *pb.DataNodeServiceStorage) (*pb.GreetingServiceReply, error) {
 	fmt.Println("Storage request recived")
 	fmt.Println(req.Id)
-	fmt.Println(req.EstaMuerto)
-	writeLine(req.EstaMuerto, req.Id)
+	fmt.Println(req.Nombre)
+	fmt.Println(req.Apellido)
+	writeLine(req.Id, req.Nombre, req.Apellido)
 	return &pb.GreetingServiceReply{
 		Message: fmt.Sprintf("Hello"),
 	}, nil

@@ -1,5 +1,6 @@
-ed16ad72-2155-4c18-9305-1e87ed32ac7b muerto
-272d07a8-2971-44ec-9ead-0617e8985744 infectado
-48f6e8f5-41da-4495-b2c2-3d7602a5f539 infectado
-792256c9-4d3d-4e8c-9831-0202cb51baa8 infectado
-713e3f43-0636-4589-99e7-da85aba07ace infectado
+1952e802-fe66-40b0-ba9e-046f1171b02f Server2Test5 Appe5
+dbea048e-24d1-488f-a78b-3e31aa961f65 Server2Test7 Appe7
+248b51a6-b504-4461-b080-22c940205e14 Server2Test5 Appe5
+45e66cca-6349-42ad-b908-e1616821746f Server2Test1 Appe1
+02a44cc1-34ea-4cce-b553-860d1d921165 Server2Test9 Appe9
+bbf5666e-5f75-4994-a0ac-95a469605dd0 Server2Test3 Appe3

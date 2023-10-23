@@ -26,13 +26,14 @@ message GreetingServiceReply {
 
 message DataNodeServiceStorage {
     string id = 5;
-    bool EstaMuerto = 6;
+    string nombre = 6;
+    string apellido = 7;
 }
 
 message DataResponse {
-    repeated string data = 7;
+    repeated string data = 8;
 }
 
 message DataRequest{
-    string data = 8;
+    string data = 9;
 }

@@ -1,5 +1,5 @@
-7f4e1953-c236-43fb-b1f2-3835f4c50271 infectado
-42bf6f34-86dd-465b-9f59-ad89ad87d8ae muerto
-de394f92-a658-4a67-9433-68eafc988ad7 muerto
-0a1f9ef9-36d2-4ea5-86ff-a4eb40baff7d infectado
-b9190fc4-b9ae-4f48-96b0-97124d9866a1 muerto
+970bd009-268b-4e8a-bfbe-504af49f9eb7 Server2Test8 xxxx
+8df72f03-dc34-4181-bb65-91c87b511c72 Server2Test4 xxxxx
+a6b55cd2-226a-45e3-835a-f06b777ab3ae Server2Test6 xxxxx
+0f82cab8-1c94-46ab-b1ee-2af649ed5b5d Server2Test10 xxxxx
+0b388744-b17a-4fad-835f-86e598be8d8c Server2Test2 xxxxx

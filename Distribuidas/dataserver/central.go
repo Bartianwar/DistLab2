@@ -15,21 +15,34 @@ import (
 
 type GreetingServer struct {
 	pb.GreetingServiceServer
-	pb.DataServiceServer
 	dataNodeClient1 pb.DataNodeServiceClient
 	dataNodeClient2 pb.DataNodeServiceClient
 }
 
+type DataServiceServer struct {
+	pb.DataServiceServer
+}
+
+
+func readDataFromFile() ([]string, error) {
+	file, err := os.Open("DATA.txt")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	return nil, nil
+}
+
 func (s *DataServiceServer) GetData(ctx context.Context, req *pb.DataRequest) (*pb.DataResponse, error) {
-	data, err := readDataFromFile() // Implement this function to read data from "data.txt"
+	data, err := readDataFromFile()
 	if err != nil {
 		return nil, err
 	}
 	return &pb.DataResponse{Data: data}, nil
 }
 
-func writeLine(Nombre string, Apellido string, Id string){
-	line := []byte(Nombre + " " + Apellido + " " + Id + "\n")
+func writeLine(Id string, cualData string, Estado string){
+	line := []byte(Id + " " + Estado + " " + cualData +"\n")
 	f, err := os.OpenFile("DATA.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		log.Fatal(err)
@@ -45,23 +58,30 @@ func (s *GreetingServer) Greeting(ctx context.Context, req *pb.GreetingServiceRe
 	fmt.Println(req.Nombre)
 	fmt.Println(req.Apellido)
 	fmt.Println(req.EstaMuerto)
+	var Estado string
+	if req.EstaMuerto {
+		Estado = "muerto"
+	} else {
+		Estado = "infectado"
+	}
 
 	uniqueID := generateUniqueID()
 	fmt.Println(uniqueID)
 
-	writeLine(req.Nombre, req.Apellido, uniqueID)
-
-
-
 	dataNodeRequest := &pb.DataNodeServiceStorage{
 		Id:        uniqueID,
-		EstaMuerto: req.EstaMuerto,
+		Nombre:    req.Nombre,
+		Apellido:  req.Apellido,
 	}
+
+	
 
 	var dataNodeClient pb.DataNodeServiceClient
 	if strings.ToLower(req.Apellido) < "m" {
+		writeLine(uniqueID, "1", Estado)
 		dataNodeClient = s.dataNodeClient1
 	} else {
+		writeLine(uniqueID, "2", Estado)
 		dataNodeClient = s.dataNodeClient2
 	}
 
